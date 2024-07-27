@@ -100,7 +100,7 @@ namespace apiary {
     delegate void SetLogMsgCallback(string msg);
     public void LogMsg(string msg) {
       if (this.TextErrorLog.InvokeRequired) {
-        SetLogMsgCallback d = new SetLogMsgCallback(LogMsg);
+        SetLogMsgCallback d = new(LogMsg);
         this.BeginInvoke(d, new object[] { msg });
       } else {
         if (!isErrorVisible) { isErrorVisible = true; }
@@ -112,11 +112,36 @@ namespace apiary {
     delegate void SetProgressLogCallback(string msg);
     public void LogProgress(string msg) {
       if (this.textBox1.InvokeRequired) {
-        SetProgressLogCallback d = new SetProgressLogCallback(LogMsg);
+        SetProgressLogCallback d = new(LogProgress);
         this.BeginInvoke(d, new object[] { msg });
       } else {
         this.textBox1.Text = msg + Environment.NewLine + textBox1.Text;
       }
+    }
+
+    delegate void SetProgressBarCallback(int min, int max, int value);
+    public void SetProgressBar(int min, int max, int value) { 
+      if (this.pbMain.InvokeRequired) { 
+        SetProgressBarCallback d = new(SetProgressBar);
+        this.BeginInvoke(d, new object[] { min, max, value });
+      } else { 
+        if (value == 0) {          
+          if (pbMain.Visible) {
+            pbMain.Visible = false;
+          }
+          pbMain.Minimum = value > min ? min : value;
+          pbMain.Maximum = value < max ? max : value;
+          pbMain.Value = value;
+        } else {
+          pbMain.Minimum = value > min ? min : value;
+          pbMain.Maximum = value < max ? max : value;
+          pbMain.Value = value;
+          if (!pbMain.Visible) {
+            pbMain.Visible = true;
+          }
+        }        
+      }
+
     }
 
     private bool isErrorVisible {
@@ -142,7 +167,7 @@ namespace apiary {
 
     private void TabOnOff_Selecting(object sender, TabControlCancelEventArgs e) {
       if (e.TabPageIndex == 0) {
-
+        if (cbRunTimers.Enabled) { cbRunTimers.Enabled = false;}
       } else if (e.TabPageIndex == 1) {
         try {
           SaveLocationSettings();
@@ -165,12 +190,15 @@ namespace apiary {
         $"{Convert.ToDecimal((60.0 * 60.0) / ((trackBar1.Value + 7.0) / 10)).AsStr1P()} /hour or so ";
     }
 
+    private int MaxCountdown = 0;
     private void cbRunTimers_CheckedChanged(object sender, EventArgs e) {
       Countdown = 2 + trackBar1.Value;
+      MaxCountdown = Countdown;
       if (cbRunTimers.Checked == true) {
         timer1.Enabled = true;
         ShouldStop = false;
         lbCountdown.Text = (Convert.ToDecimal(Countdown / 10.0)).AsStr1P();
+        SetProgressBar(0, MaxCountdown, Countdown);
         LogProgress($"Autorun Enabled {DateTime.Now}");
       } else {
         timer1.Enabled = false;
@@ -185,36 +213,42 @@ namespace apiary {
         try {
           if (Countdown >= 1) {
             Countdown = Countdown - 1;
+            SetProgressBar(0, MaxCountdown, Countdown);
           } else {
-            LogProgress($"Running Next {DateTime.UtcNow} ");
+            string UserLogin = edFollows.Text;
+            LogProgress($"Running {UserLogin} {DateTime.UtcNow} ");
             Countdown = (7 + trackBar1.Value);
-
+            MaxCountdown = Countdown;
             if ((CoreMin <= CoreLast) && (GraphMin <= GraphLast) && (SearchMin <= SearchLast)) {
-
-              string UserLogin = edFollows.Text;
+              SetProgressBar(0, 10, 1);              
               if (!String.IsNullOrEmpty(UserLogin)) {
                 var userToFollow = _followedService.GetUser(UserLogin);
+                SetProgressBar(0, 10, 3);
                 if (userToFollow != null) {
                   _followedService.Follow(userToFollow);
+                  SetProgressBar(0, 10, 5);
                   _followedService.GetAllFollowing(userToFollow);
                   userToFollow.FollowStatus = 1;
                   _followedService.Update(userToFollow);
                 }
               }
+              SetProgressBar(0, 10, 7);
               ProcessRateLimits();
               _followedService.SaveAll();
+              SetProgressBar(0, 10, 8);
               btnSetNext_Click(sender, e);
 
             } else {
               LogMsg($"Ratelimit skip (core, graph, search): {CoreLast} {GraphLast} {SearchLast} < {CoreMin} {GraphMin} {SearchMin}");
             }
 
-
+            SetProgressBar(0, 10, 0);
           }
 
           lbCountdown.Text = (Convert.ToDecimal(Countdown / 10.0)).AsStr1P();
 
         } catch (Exception ex) {
+          SetProgressBar(0, 10, 0);
           LogMsg(ex.ToString());
         }
         if (!ShouldStop) {
@@ -323,6 +357,7 @@ namespace apiary {
 
   public interface ILogProgress {
     public void LogProgress(string msg);
+    public void SetProgressBar(int min, int max, int value);
   }
 
 }

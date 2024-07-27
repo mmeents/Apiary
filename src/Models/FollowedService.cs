@@ -74,8 +74,11 @@ namespace apiary.Models {
     public void GetAllFollowing(FollowedUser user) { 
       var listUsers = _octoKitHelper.GetFollowing(user.Login);
       if (listUsers != null) { 
+        var iProgressCount = listUsers.Count()+20;
+        var iX = 8;
         _logProgress.LogProgress($"{user.Login} following {listUsers.Count()}");
-        foreach(var userX in listUsers) {
+        _logProgress.SetProgressBar(0, iProgressCount, iX);
+        foreach (var userX in listUsers) {
           var adbu = _followedUserFileTable.Get(userX.Login);
           if (adbu != null) {
             adbu.FollowCount = adbu.FollowCount + 1;
@@ -87,7 +90,10 @@ namespace apiary.Models {
             };
             _followedUserFileTable.Insert(anu);
           }
+          _logProgress.SetProgressBar(0, iProgressCount, iX);
+          iX++;
         }
+
       }
 
     }
