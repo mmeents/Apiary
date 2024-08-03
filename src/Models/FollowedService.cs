@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace apiary.Models {
 
@@ -76,6 +77,7 @@ namespace apiary.Models {
       if (listUsers != null) { 
         var iProgressCount = listUsers.Count()+20;
         var iX = 8;
+        var iMaxAddLimit = 1000;
         _logProgress.LogProgress($"{user.Login} following {listUsers.Count()}");
         _logProgress.SetProgressBar(0, iProgressCount, iX);
         foreach (var userX in listUsers) {
@@ -92,6 +94,9 @@ namespace apiary.Models {
           }
           _logProgress.SetProgressBar(0, iProgressCount, iX);
           iX++;
+          if (iMaxAddLimit < iX) {  // some users have 200K+ users...
+            break;
+          }
         }
 
       }

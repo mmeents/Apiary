@@ -2,6 +2,7 @@ using apiary.Models;
 using FileTables;
 using System;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace apiary {
@@ -31,6 +32,7 @@ namespace apiary {
 
     private void Form1_Shown(object sender, EventArgs e) {
       isErrorVisible = false;
+      SetProgressBar(0, MaxCountdown, 0);
       SetLocationSettings();
     }
 
@@ -106,6 +108,7 @@ namespace apiary {
         if (!isErrorVisible) { isErrorVisible = true; }
         if (!TextErrorLog.Visible) TextErrorLog.Visible = true;
         this.TextErrorLog.Text = msg + Environment.NewLine + TextErrorLog.Text;
+        if (!ShouldStop) { ShouldStop = true; }
       }
     }
 
@@ -120,12 +123,12 @@ namespace apiary {
     }
 
     delegate void SetProgressBarCallback(int min, int max, int value);
-    public void SetProgressBar(int min, int max, int value) { 
-      if (this.pbMain.InvokeRequired) { 
+    public void SetProgressBar(int min, int max, int value) {
+      if (this.pbMain.InvokeRequired) {
         SetProgressBarCallback d = new(SetProgressBar);
         this.BeginInvoke(d, new object[] { min, max, value });
-      } else { 
-        if (value == 0) {          
+      } else {
+        if (value == 0) {
           if (pbMain.Visible) {
             pbMain.Visible = false;
           }
@@ -139,7 +142,7 @@ namespace apiary {
           if (!pbMain.Visible) {
             pbMain.Visible = true;
           }
-        }        
+        }
       }
 
     }
@@ -167,7 +170,7 @@ namespace apiary {
 
     private void TabOnOff_Selecting(object sender, TabControlCancelEventArgs e) {
       if (e.TabPageIndex == 0) {
-        if (cbRunTimers.Enabled) { cbRunTimers.Enabled = false;}
+        if (cbRunTimers.Enabled) { cbRunTimers.Enabled = false; }
       } else if (e.TabPageIndex == 1) {
         try {
           SaveLocationSettings();
@@ -204,6 +207,7 @@ namespace apiary {
         timer1.Enabled = false;
         lbCountdown.Text = "";
         LogProgress($"Autorun Disabled {DateTime.Now}");
+        SetProgressBar(0, MaxCountdown, 0);
       }
     }
 
@@ -220,16 +224,19 @@ namespace apiary {
             Countdown = (7 + trackBar1.Value);
             MaxCountdown = Countdown;
             if ((CoreMin <= CoreLast) && (GraphMin <= GraphLast) && (SearchMin <= SearchLast)) {
-              SetProgressBar(0, 10, 1);              
+              SetProgressBar(0, 10, 1);
               if (!String.IsNullOrEmpty(UserLogin)) {
                 var userToFollow = _followedService.GetUser(UserLogin);
                 SetProgressBar(0, 10, 3);
                 if (userToFollow != null) {
                   _followedService.Follow(userToFollow);
-                  SetProgressBar(0, 10, 5);
-                  _followedService.GetAllFollowing(userToFollow);
+                  SetProgressBar(0, 10, 5);                  
                   userToFollow.FollowStatus = 1;
                   _followedService.Update(userToFollow);
+
+                  if (cbAddFollows.Checked) {
+                    _followedService.GetAllFollowing(userToFollow);
+                  }
                 }
               }
               SetProgressBar(0, 10, 7);
@@ -299,10 +306,13 @@ namespace apiary {
             if (!String.IsNullOrEmpty(UserLogin)) {
               var userToFollow = _followedService.GetUser(UserLogin);
               if (userToFollow != null) {
-              //  _followedService.Follow(userToFollow);
-                _followedService.GetAllFollowing(userToFollow);
+                _followedService.Follow(userToFollow);
                 userToFollow.FollowStatus = 1;
-                _followedService.Update(userToFollow);                
+                _followedService.Update(userToFollow);
+                if (cbAddFollows.Checked) { 
+                  _followedService.GetAllFollowing(userToFollow);
+                }
+
               }
             }
             ProcessRateLimits();
@@ -318,7 +328,7 @@ namespace apiary {
 
         } finally {
           Importing = false;
-          ShouldStop = false;          
+          ShouldStop = false;
           pbMain.Maximum = 0;
           btnFollows.Text = "Follows";
         }
@@ -339,8 +349,8 @@ namespace apiary {
       } else {
 
         var nextBatch = _followedService.GetNextBatch();
-        if (nextBatch!= null) { 
-          foreach(var userX in nextBatch) { 
+        if (nextBatch != null) {
+          foreach (var userX in nextBatch) {
             lbNextUp.Items.Add(userX.Login);
           }
         }
@@ -352,7 +362,16 @@ namespace apiary {
       }
     }
 
+    private void pasteListOfUserAccountsToolStripMenuItem_Click(object sender, EventArgs e) {
+      string x = Clipboard.GetText();
+      string[] lines = x.Parse(Environment.NewLine);
+      foreach (string line in lines) {
+        if (line.Length > 0) {
+          lbNextUp.Items.Add(line.ParseFirst(" "));
+        }
+      }
 
+    }
   }
 
   public interface ILogProgress {

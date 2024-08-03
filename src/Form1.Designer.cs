@@ -35,6 +35,8 @@
       TabExplore = new TabPage();
       btnSetNext = new Button();
       lbNextUp = new ListBox();
+      contextMenuStrip1 = new ContextMenuStrip(components);
+      pasteListOfUserAccountsToolStripMenuItem = new ToolStripMenuItem();
       edFollows = new TextBox();
       btnFollows = new Button();
       textBox1 = new TextBox();
@@ -51,9 +53,11 @@
       TextErrorLog = new TextBox();
       HideErrorPanel = new Button();
       timer1 = new System.Windows.Forms.Timer(components);
+      cbAddFollows = new CheckBox();
       TabOnOff.SuspendLayout();
       TabConfigure.SuspendLayout();
       TabExplore.SuspendLayout();
+      contextMenuStrip1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
       PanelError.SuspendLayout();
       SuspendLayout();
@@ -145,6 +149,7 @@
       // TabExplore
       // 
       TabExplore.BackColor = SystemColors.Control;
+      TabExplore.Controls.Add(cbAddFollows);
       TabExplore.Controls.Add(btnSetNext);
       TabExplore.Controls.Add(lbNextUp);
       TabExplore.Controls.Add(edFollows);
@@ -177,12 +182,27 @@
       // 
       // lbNextUp
       // 
+      lbNextUp.ContextMenuStrip = contextMenuStrip1;
       lbNextUp.FormattingEnabled = true;
       lbNextUp.ItemHeight = 20;
       lbNextUp.Location = new Point(120, 194);
       lbNextUp.Name = "lbNextUp";
       lbNextUp.Size = new Size(269, 384);
       lbNextUp.TabIndex = 22;
+      // 
+      // contextMenuStrip1
+      // 
+      contextMenuStrip1.ImageScalingSize = new Size(20, 20);
+      contextMenuStrip1.Items.AddRange(new ToolStripItem[] { pasteListOfUserAccountsToolStripMenuItem });
+      contextMenuStrip1.Name = "contextMenuStrip1";
+      contextMenuStrip1.Size = new Size(254, 28);
+      // 
+      // pasteListOfUserAccountsToolStripMenuItem
+      // 
+      pasteListOfUserAccountsToolStripMenuItem.Name = "pasteListOfUserAccountsToolStripMenuItem";
+      pasteListOfUserAccountsToolStripMenuItem.Size = new Size(253, 24);
+      pasteListOfUserAccountsToolStripMenuItem.Text = "Paste List of User Accounts";
+      pasteListOfUserAccountsToolStripMenuItem.Click += pasteListOfUserAccountsToolStripMenuItem_Click;
       // 
       // edFollows
       // 
@@ -336,6 +356,16 @@
       // 
       timer1.Tick += timer1_Tick;
       // 
+      // cbAddFollows
+      // 
+      cbAddFollows.AutoSize = true;
+      cbAddFollows.Location = new Point(120, 120);
+      cbAddFollows.Name = "cbAddFollows";
+      cbAddFollows.Size = new Size(170, 24);
+      cbAddFollows.TabIndex = 24;
+      cbAddFollows.Text = "Add Follow's Follows";
+      cbAddFollows.UseVisualStyleBackColor = true;
+      // 
       // Form1
       // 
       AutoScaleDimensions = new SizeF(8F, 20F);
@@ -351,6 +381,7 @@
       TabConfigure.PerformLayout();
       TabExplore.ResumeLayout(false);
       TabExplore.PerformLayout();
+      contextMenuStrip1.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
       PanelError.ResumeLayout(false);
       PanelError.PerformLayout();
@@ -386,5 +417,8 @@
     private ListBox lbNextUp;
     private TextBox edFollows;
     private Button btnFollows;
+    private ContextMenuStrip contextMenuStrip1;
+    private ToolStripMenuItem pasteListOfUserAccountsToolStripMenuItem;
+    private CheckBox cbAddFollows;
   }
 }
