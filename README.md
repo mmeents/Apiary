@@ -1,4 +1,6 @@
 # Apiary
+Note Version 2 of project is in the srcV2 folder.  it's the latest.  Kept v1 around as reference. Main difference in V2 is that the Rate limit now pulls from a schedule and a scheduler to populate and everything runs in background tasks so that the countdown is effected least.  It still pauses a bit when adding followings when there are many... work in progress...  V2 is a major rewrite.  Using FeedTech techniques. 
+
 C# Windows Form App to help follow users on GitHub.  Showcase FileTable and what AppSmith can do.  
 
 You need to set up Access Token: <br>
@@ -31,5 +33,6 @@ When user is donloaded a second time then the FollowCount in incremented.
 When Set Next runs it grabs the top 5 to follow ordered by followcount descending.
 
 So as 5 users are added the counts change to only follow the top 5 most followed at a time. 
+
 
 Enjoy Matt.

@@ -33,6 +33,7 @@
       label1 = new Label();
       TbAccessToken = new TextBox();
       TabExplore = new TabPage();
+      cbAddFollows = new CheckBox();
       btnSetNext = new Button();
       lbNextUp = new ListBox();
       contextMenuStrip1 = new ContextMenuStrip(components);
@@ -53,7 +54,8 @@
       TextErrorLog = new TextBox();
       HideErrorPanel = new Button();
       timer1 = new System.Windows.Forms.Timer(components);
-      cbAddFollows = new CheckBox();
+      LabelSettingsLabel = new Label();
+      label8 = new Label();
       TabOnOff.SuspendLayout();
       TabConfigure.SuspendLayout();
       TabExplore.SuspendLayout();
@@ -79,6 +81,8 @@
       // 
       TabConfigure.BackColor = SystemColors.Control;
       TabConfigure.BorderStyle = BorderStyle.FixedSingle;
+      TabConfigure.Controls.Add(label8);
+      TabConfigure.Controls.Add(LabelSettingsLabel);
       TabConfigure.Controls.Add(label4);
       TabConfigure.Controls.Add(TbAccessTokenName);
       TabConfigure.Controls.Add(label3);
@@ -95,7 +99,7 @@
       // label4
       // 
       label4.AutoSize = true;
-      label4.Location = new Point(17, 26);
+      label4.Location = new Point(20, 93);
       label4.Name = "label4";
       label4.Size = new Size(247, 20);
       label4.TabIndex = 6;
@@ -104,7 +108,7 @@
       // TbAccessTokenName
       // 
       TbAccessTokenName.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-      TbAccessTokenName.Location = new Point(43, 63);
+      TbAccessTokenName.Location = new Point(46, 130);
       TbAccessTokenName.Name = "TbAccessTokenName";
       TbAccessTokenName.Size = new Size(839, 27);
       TbAccessTokenName.TabIndex = 5;
@@ -113,7 +117,7 @@
       // 
       label3.Anchor = AnchorStyles.Top | AnchorStyles.Right;
       label3.AutoSize = true;
-      label3.Location = new Point(566, 26);
+      label3.Location = new Point(569, 93);
       label3.Name = "label3";
       label3.Size = new Size(316, 20);
       label3.TabIndex = 3;
@@ -123,7 +127,7 @@
       // 
       label2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       label2.AutoSize = true;
-      label2.Location = new Point(17, 200);
+      label2.Location = new Point(20, 267);
       label2.Name = "label2";
       label2.Size = new Size(876, 20);
       label2.TabIndex = 2;
@@ -132,7 +136,7 @@
       // label1
       // 
       label1.AutoSize = true;
-      label1.Location = new Point(17, 106);
+      label1.Location = new Point(20, 173);
       label1.Name = "label1";
       label1.Size = new Size(203, 20);
       label1.TabIndex = 1;
@@ -141,7 +145,7 @@
       // TbAccessToken
       // 
       TbAccessToken.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-      TbAccessToken.Location = new Point(43, 143);
+      TbAccessToken.Location = new Point(46, 210);
       TbAccessToken.Name = "TbAccessToken";
       TbAccessToken.Size = new Size(839, 27);
       TbAccessToken.TabIndex = 0;
@@ -169,6 +173,16 @@
       TabExplore.Size = new Size(952, 761);
       TabExplore.TabIndex = 1;
       TabExplore.Text = "Explore";
+      // 
+      // cbAddFollows
+      // 
+      cbAddFollows.AutoSize = true;
+      cbAddFollows.Location = new Point(120, 120);
+      cbAddFollows.Name = "cbAddFollows";
+      cbAddFollows.Size = new Size(170, 24);
+      cbAddFollows.TabIndex = 24;
+      cbAddFollows.Text = "Add Follow's Follows";
+      cbAddFollows.UseVisualStyleBackColor = true;
       // 
       // btnSetNext
       // 
@@ -356,15 +370,23 @@
       // 
       timer1.Tick += timer1_Tick;
       // 
-      // cbAddFollows
+      // LabelSettingsLabel
       // 
-      cbAddFollows.AutoSize = true;
-      cbAddFollows.Location = new Point(120, 120);
-      cbAddFollows.Name = "cbAddFollows";
-      cbAddFollows.Size = new Size(170, 24);
-      cbAddFollows.TabIndex = 24;
-      cbAddFollows.Text = "Add Follow's Follows";
-      cbAddFollows.UseVisualStyleBackColor = true;
+      LabelSettingsLabel.AutoSize = true;
+      LabelSettingsLabel.Location = new Point(20, 25);
+      LabelSettingsLabel.Name = "LabelSettingsLabel";
+      LabelSettingsLabel.Size = new Size(192, 20);
+      LabelSettingsLabel.TabIndex = 7;
+      LabelSettingsLabel.Text = "Settings and storage folder:";
+      // 
+      // label8
+      // 
+      label8.AutoSize = true;
+      label8.Location = new Point(46, 49);
+      label8.Name = "label8";
+      label8.Size = new Size(239, 20);
+      label8.TabIndex = 8;
+      label8.Text = "c:\\Some\\path\\to\\computed\\folder";
       // 
       // Form1
       // 
@@ -420,5 +442,7 @@
     private ContextMenuStrip contextMenuStrip1;
     private ToolStripMenuItem pasteListOfUserAccountsToolStripMenuItem;
     private CheckBox cbAddFollows;
+    private Label LabelSettingsLabel;
+    private Label label8;
   }
 }

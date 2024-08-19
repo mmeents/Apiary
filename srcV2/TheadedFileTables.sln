@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TheadedFileTables", "..\srcV2\TheadedFileTables.csproj", "{C4CD0EC5-45F7-421F-9AD6-95CCFF043592}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheadedFileTables", "TheadedFileTables.csproj", "{F097DA16-AA27-4E32-8B29-75E24761ADEB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C4CD0EC5-45F7-421F-9AD6-95CCFF043592}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4CD0EC5-45F7-421F-9AD6-95CCFF043592}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4CD0EC5-45F7-421F-9AD6-95CCFF043592}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4CD0EC5-45F7-421F-9AD6-95CCFF043592}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F097DA16-AA27-4E32-8B29-75E24761ADEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F097DA16-AA27-4E32-8B29-75E24761ADEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F097DA16-AA27-4E32-8B29-75E24761ADEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F097DA16-AA27-4E32-8B29-75E24761ADEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {3F7B9F05-FE9D-45F4-8D0E-CEE2A9FA8FC0}
+		SolutionGuid = {9D69C04A-EE86-40AC-B7B9-AD25E243095E}
 	EndGlobalSection
 EndGlobal

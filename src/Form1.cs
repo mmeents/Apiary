@@ -230,7 +230,7 @@ namespace apiary {
                 SetProgressBar(0, 10, 3);
                 if (userToFollow != null) {
                   _followedService.Follow(userToFollow);
-                  SetProgressBar(0, 10, 5);                  
+                  SetProgressBar(0, 10, 5);
                   userToFollow.FollowStatus = 1;
                   _followedService.Update(userToFollow);
 
@@ -309,7 +309,7 @@ namespace apiary {
                 _followedService.Follow(userToFollow);
                 userToFollow.FollowStatus = 1;
                 _followedService.Update(userToFollow);
-                if (cbAddFollows.Checked) { 
+                if (cbAddFollows.Checked) {
                   _followedService.GetAllFollowing(userToFollow);
                 }
 
