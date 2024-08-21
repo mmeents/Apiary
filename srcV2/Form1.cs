@@ -1,7 +1,9 @@
 using FileTables;
 using Microsoft.VisualBasic.Logging;
 using Octokit;
+using System.Text;
 using TheadedFileTables.Models;
+using static TheadedFileTables.Models.FollowedUserFileTable;
 
 namespace TheadedFileTables {
   public partial class Form1 : Form, ILogMsg, ILogProgress {
@@ -12,8 +14,8 @@ namespace TheadedFileTables {
 
     private int MaxCountdown = 0;
     private int Countdown = 0;
-    private int RateRefreshCountdownStart = 10;
-    private int RateRefreshCountdown = 10;
+    private int RateRefreshCountdownStart = 1;
+    private int RateRefreshCountdown = 1;
 
     private bool IsSaving = false;
     private bool ShouldStop = true;
@@ -55,7 +57,18 @@ namespace TheadedFileTables {
         SetProgressLogCallback d = new(LogProgress);
         this.BeginInvoke(d, new object[] { msg });
       } else {
-        this.textBox1.Text = msg + Environment.NewLine + textBox1.Text;
+        StringBuilder sb = new StringBuilder();
+        var lines = textBox1.Text.Split(Environment.NewLine);
+        var lineCount = lines.Length;
+        sb.AppendLine(msg);
+        for(var i =0; i<200; i++) {
+          if (i <= lineCount - 1) {
+            sb.AppendLine(lines[i]);
+          } else { 
+            break;
+          }          
+        }
+        this.textBox1.Text = sb.ToString();
       }
     }
 
@@ -89,29 +102,34 @@ namespace TheadedFileTables {
         SetReloadSchedule d = new(ReloadLbSchedule);
         this.BeginInvoke(d, new Object[] { 0 });
       } else {
-        try { 
+        try {
+          
           lbSchedule.Items.Clear();
           var res0 = _followedService.OpSchedule.Values.ToList();
-          foreach (var schedtask in res0) {
-            string OpTask = "";
-            switch (schedtask.Optype) {
-              case LmtOptype.UpdateRateLimits: OpTask = "UpdateRateLimits"; break;
-              case LmtOptype.GetUser: OpTask = "GetUser"; break;
-              case LmtOptype.CheckFollow: OpTask = "CheckFollow"; break;
-              case LmtOptype.Follow: OpTask = "Follow"; break;
-              case LmtOptype.AddFollowing: OpTask = "AddFollowing"; break;
-            }
-            lbSchedule.Items.Add(schedtask.Id.AsString() + " " + OpTask + " " + schedtask.Login);
+          foreach (var schedtask in res0) {            
+            lbSchedule.Items.Add(schedtask.Optype.AsString() + " " + schedtask.Login);
           }
 
-          lbFtQueue.Items.Clear();
-          var res = _followedService.FollowedUserTable.ToDoQueue.Values.ToList();
-          foreach (FuOp? op in res) {
-            if (op != null) {
-              string itemStr = op.OperationType + " " + op.User?.Login??"";
-              lbFtQueue.Items.Add(itemStr);
-            }
+          lbFtQueue.Items.Clear();          
+          var todoCount = _followedService.FollowedUserTable.ToDoQueue.Keys.Count;
+          var keys = _followedService.FollowedUserTable.ToDoQueue.Keys.ToList();
+          if (todoCount-1 >= 0 ) {
+            var op = _followedService.FollowedUserTable.ToDoQueue[keys[0]];
+            lbFtQueue.Items.Add(op.OperationType + " " + op.User?.Login ?? "");
           }
+          if (todoCount - 1 >= 1) {
+            var op = _followedService.FollowedUserTable.ToDoQueue[keys[1]];
+            lbFtQueue.Items.Add(op.OperationType + " " + op.User?.Login ?? "");
+          }
+          if (todoCount - 1 >= 2) {
+            var op = _followedService.FollowedUserTable.ToDoQueue[keys[2]];
+            lbFtQueue.Items.Add(op.OperationType + " " + op.User?.Login ?? "");
+          }
+          if (todoCount - 1 >= 3) {
+            var op = _followedService.FollowedUserTable.ToDoQueue[keys[3]];
+            lbFtQueue.Items.Add(op.OperationType + " " + op.User?.Login ?? "");
+          }
+          
 
           lbLmtQueue.Items.Clear();
           var res2 = _followedService.LimitedOps.Values.ToList();
@@ -122,11 +140,13 @@ namespace TheadedFileTables {
           if (LastRateLimitResult != null) {
             WriteRateLimits(LastRateLimitResult);
           }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
           // skip stopping things on a drawing error...
         }
       }
     }
+
+
 
     delegate void SetSyncSaveFollows(int unused);
 
@@ -234,15 +254,29 @@ namespace TheadedFileTables {
       MaxCountdown = Countdown;
       if (cbRunTimers.Checked == true) {
         TimerRateLimit.Enabled = true;
+        TimerFollowTblUpdates.Enabled = true;
         ShouldStop = false;
         lbCountdown.Text = (Convert.ToDecimal(Countdown / 10.0)).AsStr1P();
         SetProgressBar(0, MaxCountdown, Countdown);
         LogProgress($"Autorun Enabled {DateTime.Now}");
       } else {
         TimerRateLimit.Enabled = false;
+        TimerFollowTblUpdates.Enabled = false;
         lbCountdown.Text = "";
         LogProgress($"Autorun Disabled {DateTime.Now}");
         SetProgressBar(0, MaxCountdown, 0);
+      }
+    }
+
+    private void TimerFollowTblUpdates_Tick(object sender, EventArgs e) {
+      try { 
+        if (_followedService.FollowedUserTable.ToDoQueue.Count > 0) { 
+          if (Countdown > 7) { 
+            _followedService.FollowedUserTable.ProcessScheduledOps(25);
+          }
+        }
+      } catch (Exception ex) {
+        LogMsg($"{DateTime.Now} Error "+ex.ToString());
       }
     }
     private void TimerRateLimit_Tick(object sender, EventArgs e) {
@@ -259,6 +293,9 @@ namespace TheadedFileTables {
                   _followedService.OpSchedule.AddToSchedule(LmtOptype.UpdateRateLimits, "");
                   FirstRateScheduled = true;
                 }
+                if (edFollows.Text == "") {
+                  btnSetNext_Click(sender, e);
+                }
                 string login = edFollows.Text;
                 var user = _followedService.LookupUser(login);
                 if (user == null) {
@@ -271,15 +308,14 @@ namespace TheadedFileTables {
                     _followedService.OpSchedule.AddToSchedule(LmtOptype.AddFollowing, login);
                   }
                 }
-                if (RateRefreshCountdown > 0) { 
+                if (RateRefreshCountdown > 0) {
                   RateRefreshCountdown--;
                 } else {
-                  _followedService.OpSchedule.AddToSchedule(LmtOptype.UpdateRateLimits,"");
+                  _followedService.OpSchedule.AddToSchedule(LmtOptype.UpdateRateLimits, "");
                   _followedService.FollowedUserTable.AddOp(FuOptype.Save, null);
                   RateRefreshCountdown = RateRefreshCountdownStart;
                 }
-                btnSetNext_Click(sender, e);
-                ReloadLbSchedule(0);
+                btnSetNext_Click(sender, e);                
               }
             }
           } else {
@@ -287,7 +323,7 @@ namespace TheadedFileTables {
             MaxCountdown = Countdown;
             if (_RateStatus.IsWithinLimits) {
               var Scheduled = _followedService.OpSchedule.Pop();
-              if (Scheduled != null) {
+              if (Scheduled != null){
                 _followedService.LimitedOps.AddOp(new LmtOp(_followedService.LimitedOps, 0, Scheduled.Optype, Scheduled.Login, cbAddFollows.Checked));
               } else {
                 LogMsg($"{DateTime.UtcNow} Skipping Nothing Scheduled");
@@ -468,5 +504,7 @@ namespace TheadedFileTables {
       SyncSaveFollows(0);
       ReloadLbSchedule(0);
     }
+
+
   }
 }

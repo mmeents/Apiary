@@ -60,6 +60,7 @@
       TextErrorLog = new TextBox();
       HideErrorPanel = new Button();
       TimerRateLimit = new System.Windows.Forms.Timer(components);
+      TimerFollowTblUpdates = new System.Windows.Forms.Timer(components);
       ((System.ComponentModel.ISupportInitialize)SplitMain).BeginInit();
       SplitMain.Panel1.SuspendLayout();
       SplitMain.Panel2.SuspendLayout();
@@ -449,6 +450,10 @@
       // 
       TimerRateLimit.Tick += TimerRateLimit_Tick;
       // 
+      // TimerFollowTblUpdates
+      // 
+      TimerFollowTblUpdates.Tick += TimerFollowTblUpdates_Tick;
+      // 
       // Form1
       // 
       AutoScaleDimensions = new SizeF(8F, 20F);
@@ -515,5 +520,6 @@
     private ListBox lbLmtQueue;
     private Button btnManualSave;
     private Button btnManualRefresh;
+    private System.Windows.Forms.Timer TimerFollowTblUpdates;
   }
 }

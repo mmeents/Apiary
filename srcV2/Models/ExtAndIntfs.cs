@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -22,8 +23,7 @@ namespace TheadedFileTables.Models {
     public static string FollowedUserFileName { get { return DefaultPath + CExt.FollowedUserFileNameAdd; } }
   }
 
-  public static class Ext {
-  
+  public static class Ext {  
     public static string AsStr1P(this decimal x) {
       return String.Format(CultureInfo.InvariantCulture, "{0:0.0}", x);
     }
@@ -33,6 +33,29 @@ namespace TheadedFileTables.Models {
         Id = user?.Id ?? 0,
         Login = user?.Login ?? "",
       };
+    }
+
+    public static string AsString(this FuOptype opType) {
+      string opStr = "";
+      switch (opType) {
+        case FuOptype.Insert: opStr = "Insert"; break;
+        case FuOptype.Update: opStr = "Update"; break;
+        case FuOptype.Delete: opStr = "Delete"; break;
+        case FuOptype.MarkFollowed: opStr = "MarkFollowed"; break;
+        case FuOptype.Save: opStr = "Save"; break;
+      }
+      return opStr;
+    }
+    public static string AsString(this LmtOptype opType) { 
+      string opStr = "";
+      switch (opType) {
+        case LmtOptype.UpdateRateLimits: opStr ="UpdateRateLimits"; break;
+        case LmtOptype.GetUser: opStr ="GetUser"; break;
+        case LmtOptype.CheckFollow: opStr = "CheckFollow"; break;
+        case LmtOptype.Follow: opStr = "Follow"; break;
+        case LmtOptype.AddFollowing: opStr = "AddFollowing"; break;
+      }
+      return opStr;
     }
   }
 

@@ -36,8 +36,7 @@ namespace TheadedFileTables.Models {
 
     public void GetRateLimits() {
       RateLimitResult limits = _octoKitHelper.GetRateLimits();
-      Mainform.LastRateLimitResult = limits;
-      Mainform.ReloadLbSchedule(0);
+      Mainform.LastRateLimitResult = limits;      
       _logProgress.LogProgress($"{DateTime.Now} RateCheck");
     }
 

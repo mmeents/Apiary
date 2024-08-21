@@ -3,9 +3,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static TheadedFileTables.Models.FollowedUserFileTable;
 
 namespace TheadedFileTables.Models {
   public static class Fc {   // column names
@@ -30,7 +32,8 @@ namespace TheadedFileTables.Models {
     public bool NeedsSave = false;
     public Columns Columns { get { return _table.Columns; } }
     public Rows Rows { get { return _table.Rows; } }
-    public FuOps ToDoQueue{ get; set; }
+    public FuSchedule ToDoQueue { get; set; }
+    public FuOps ToDoWorking{ get; set; }
     public Form1 Mainform { get; set; }
     public FollowedUserFileTable(string fileName, Form1 mainform) {
       _table = new FileTable(fileName);
@@ -42,7 +45,8 @@ namespace TheadedFileTables.Models {
         _table.AddColumn(Fc.Id, ColumnType.Int64);
         _table.AddColumn(Fc.Login, ColumnType.String);
       }
-      ToDoQueue = new FuOps(this);
+      ToDoQueue = new FuSchedule(this, mainform);
+      ToDoWorking = new FuOps(this);
       Mainform = mainform;
     }
     public FollowedUser? Get(long Uid) {
@@ -133,13 +137,68 @@ namespace TheadedFileTables.Models {
     }
 
     public void AddOp(FuOptype optype, FollowedUser? user) { 
-      ToDoQueue.AddOp(new FuOp(ToDoQueue, 0, optype, user ));
+      if (optype == FuOptype.Save || user != null ) {
+        ToDoQueue.AddToSchedule(optype, user);
+      }
+    }
+
+    public void ProcessScheduledOps(int batchSize) {
+      if (batchSize > 0) { 
+        int iOpCount = 0;
+        while (iOpCount < batchSize) {
+          var aToDo = ToDoQueue.Pop();
+          if (aToDo != null) { 
+            ToDoWorking.AddOp(new FuOp(this.ToDoWorking, 0, aToDo.Optype, aToDo.User));
+          }
+          if (ToDoQueue.Count == 0) {
+            break;
+          } else { 
+            iOpCount++;
+          }
+        }
+      }
     }
   }
 
   public enum FuOptype { 
     Insert, Update, Delete, MarkFollowed, Save
   }
+
+  public class FuSchItem { 
+    public Int64 Id { get; set; }
+    public FuOptype Optype { get; set; }
+    public FollowedUser? User { get; set; }
+    public FuSchItem(FuOptype optype, FollowedUser? user) { 
+      Id = 0;
+      Optype = optype;
+      User = user;
+    }
+    public string OperationType { get { return Optype.AsString(); } }
+  }
+  public class FuSchedule : ConcurrentDictionary<long, FuSchItem> {
+    public Int64 Nonce = 1;
+    public FollowedUserFileTable Owner;
+    public Form1 Mainform;
+    public FuSchedule(FollowedUserFileTable owner, Form1 mainform) {
+      Owner = owner;
+      Mainform = mainform;
+    }
+    public FuSchItem AddToSchedule(FuOptype opType, FollowedUser? user) {
+      Nonce++;
+      var op = new FuSchItem(opType, user);
+      op.Id = Nonce;
+      base[Nonce] = op;
+      return op;
+    }
+    public FuSchItem? Pop() {
+      FuSchItem? aR = null;
+      if (Keys.Count > 0) {
+        base.TryRemove(base.Keys.OrderBy(x => x).First(), out aR);
+      }
+      return aR;
+    }
+  }
+
 
   public class FuOp {
     public long Id = 0;
@@ -163,11 +222,6 @@ namespace TheadedFileTables.Models {
       } catch (Exception ex) { 
         Owner.Owner.Mainform.LogMsg($"{DateTime.Now} ErrorBGD {ex.Message}");
       }
-      try {
-        Owner.Owner.Mainform.ReloadLbSchedule(0);
-      } catch (Exception ex) {
-        Owner.Owner.Mainform.LogMsg($"{DateTime.Now} ErrorRL {ex.Message}");
-      }      
       Owner.Remove(this.Id);
     }
     private void DoWorkHandeler(object? sender, DoWorkEventArgs e) {
@@ -198,17 +252,7 @@ namespace TheadedFileTables.Models {
         Owner.Owner.Mainform.LogMsg($"{DateTime.Now} Error {ex.Message}");
       }
     }
-    public string OperationType { get { 
-      string opStr = "";
-      switch (OpType) {
-        case FuOptype.Insert: opStr = "Insert";  break;
-        case FuOptype.Update: opStr = "Update";  break;
-        case FuOptype.Delete: opStr = "Delete";  break;
-        case FuOptype.MarkFollowed: opStr = "MarkFollowed"; break;
-        case FuOptype.Save: opStr = "Save"; break;
-      }
-      return opStr;
-    } }
+    public string OperationType { get { return OpType.AsString();}}
   }
   public class FuOps : ConcurrentDictionary<long, FuOp> {
     public Int64 Nonce = 1;

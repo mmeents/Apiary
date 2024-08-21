@@ -73,12 +73,12 @@ namespace TheadedFileTables.Models {
       BgWorker.RunWorkerAsync();
     }
     private void DoWorkCompleteHandeler(object? sender, RunWorkerCompletedEventArgs e) {
-      try { 
-        Owner.Owner.Mainform.ReloadLbSchedule(0);
+      try {
+        BgWorker.Dispose();
       } catch (Exception ex) { 
         Owner.Owner.Mainform.LogMsg($"{DateTime.Now} Error0 {ex.Message}");
       }
-      BgWorker.Dispose();
+      
       Owner.Remove(this.Id);
     }
     private void DoWorkHandeler(object? sender, DoWorkEventArgs e) {
@@ -111,17 +111,7 @@ namespace TheadedFileTables.Models {
       }
     }
 
-    public string OpLabel { get {
-        string opLbl = "";
-        switch (OpType) { 
-          case LmtOptype.UpdateRateLimits: opLbl = "UpdateRateLimits"; break; 
-          case LmtOptype.GetUser: opLbl = "GetUser"; break;
-          case LmtOptype.CheckFollow: opLbl = "CheckFollow"; break;
-          case LmtOptype.Follow: opLbl = "Follow"; break;
-          case LmtOptype.AddFollowing: opLbl = "AddFollowing"; break;
-        }
-      return opLbl+ " " + _login; 
-    } }
+    public string OpLabel { get { return OpType.AsString() + " " + _login; } }
   }
   public class LmtOps : ConcurrentDictionary<long, LmtOp> {
     public Int64 Nonce = 1;
